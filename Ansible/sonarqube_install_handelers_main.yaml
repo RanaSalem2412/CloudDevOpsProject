@@ -1,0 +1,13 @@
+---
+# handlers file for sonarqube_install
+
+- name: Restart SonarQube
+  systemd:
+    name: sonarqube
+    state: restarted
+    enabled: yes
+# Handler to restart SonarQube service after changes
+- name: Restart SonarQube
+  systemd:
+    name: sonarqube
+    state: restarted
