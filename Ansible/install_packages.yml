@@ -1,0 +1,10 @@
+---
+- name: Configure EC2 Instances
+  hosts: all
+  become: true
+  roles:
+    - git_install
+    - docker_install
+    - java_install
+    - jenkins_install
+    - sonarqube_install
