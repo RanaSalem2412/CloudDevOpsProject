@@ -1,0 +1,27 @@
+---
+- name: Add Jenkins repository
+  get_url:
+    url: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+    dest: "/etc/yum.repos.d/jenkins.repo"
+
+
+- name: Import Jenkins GPG key
+  rpm_key:
+    key: "https://pkg.jenkins.io/redhat-stable/jenkins.io.key"
+    state: present
+    validate_certs: no 
+
+
+- name: Install Jenkins
+  yum:
+    name: jenkins
+    state: present
+    disable_gpg_check: yes  
+
+
+- name: Ensure Jenkins service is enabled and started
+  systemd:
+    name: jenkins
+    enabled: yes
+    state: started
+
