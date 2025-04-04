@@ -1,0 +1,95 @@
+- name: Ensure the SonarQube directory exists
+  file:
+    path: /opt/sonarqube
+    state: directory
+    mode: '0755'
+    owner: sonar
+    group: sonar
+
+- name: Download SonarQube
+  get_url:
+    url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-10.2.0.77647.zip"
+    dest: /opt/sonarqube/sonarqube-10.2.0.77647.zip
+    mode: '0644'
+
+- name: Unzip SonarQube
+  unarchive:
+    src: /opt/sonarqube/sonarqube-10.2.0.77647.zip
+    dest: /opt/sonarqube/
+    remote_src: yes
+    owner: sonar
+    group: sonar
+
+- name: Ensure correct ownership of SonarQube files
+  file:
+    path: /opt/sonarqube
+    recurse: yes
+    owner: sonar
+    group: sonar
+    mode: '0755'
+
+- name: Ensure sonar.sh has the correct permissions
+  file:
+    path: /opt/sonarqube/sonarqube-10.2.0.77647/bin/linux-x86-64/sonar.sh
+    mode: '0755'
+    owner: sonar
+    group: sonar
+
+- name: Configure database settings in sonar.properties
+  lineinfile:
+    path: /opt/sonarqube/sonarqube-10.2.0.77647/conf/sonar.properties
+    line: |
+      sonar.jdbc.url=jdbc:postgresql://localhost:5432/sonarqube
+      sonar.jdbc.username=sonar
+      sonar.jdbc.password=sonarpassword
+    create: yes
+    backup: yes
+
+- name: Update SonarQube memory settings
+  lineinfile:
+    path: /opt/sonarqube/sonarqube-10.2.0.77647/conf/sonar.properties
+    regexp: '^sonar.search.javaOpts'
+    line: 'sonar.search.javaOpts=-Xmx2G -Xms1G'
+    create: yes
+    backup: yes
+
+- name: Update SonarQube web memory settings
+  lineinfile:
+    path: /opt/sonarqube/sonarqube-10.2.0.77647/conf/sonar.properties
+    regexp: '^sonar.web.javaOpts'
+    line: 'sonar.web.javaOpts=-Xmx2G -Xms1G'
+    create: yes
+    backup: yes
+
+- name: Update SonarQube service file
+  copy:
+    content: |
+      [Unit]
+      Description=SonarQube
+      After=network.target postgresql.service
+
+      [Service]
+      Type=simple
+      User=sonar
+      Group=sonar
+      ExecStart=/opt/sonarqube/sonarqube-10.2.0.77647/bin/linux-x86-64/sonar.sh start
+      ExecStop=/opt/sonarqube/sonarqube-10.2.0.77647/bin/linux-x86-64/sonar.sh stop
+      LimitNOFILE=65536
+      LimitNPROC=4096
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/sonarqube.service
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Reload systemd to apply changes
+  systemd:
+    daemon_reload: yes
+
+- name: Ensure SonarQube service is enabled and started
+  systemd:
+    name: sonarqube
+    state: started
+    enabled: true
