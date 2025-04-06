@@ -30,7 +30,7 @@
 --- 
 ### 3. containerization
 #### Created a Dockerfile to build the application image.
-#### Built and ran the Docker container successfully.
+#### Built and run the Docker container successfully.
 #### Verified application inside the container.
 ---
 ### 4. Kubernetes Deployment
