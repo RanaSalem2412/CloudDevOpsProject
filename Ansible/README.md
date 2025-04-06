@@ -2,15 +2,14 @@
 #### Inside the my_project directory, create a dynamic inventory file named aws_ec2.yaml:
 ```
 ---
-- name: Configure EC2 Instances
-  hosts: all
-  become: true
-  roles:
-    - git_install
-    - docker_install
-    - java_install
-    - jenkins_install
-    - sonarqube_install
+plugin: aws_ec2
+regions:
+  - us-east-1
+keyed_groups:
+  - key: tags.Name 
+    hostnames: tag:Name   
+compose:
+  ansible_host: public_ip_address 
 ```
 ## 2. Copying the EC2 Key Pair
 ####  Copy the private key (keypair_lab22.pem) used when launching the EC2 instances:
