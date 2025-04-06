@@ -1,4 +1,4 @@
-# SonarQube Installation and Setup on Ubuntu / Amazon Linux
+# SonarQube Installation and Setup on Amazon Linux
 ## 1- Update System and Install Required Packages
 ### First, update your system and install the required tools.
 ```
