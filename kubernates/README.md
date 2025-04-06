@@ -54,7 +54,8 @@ minikube image load myapp:v1
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myapp-deployment
+  name: myapp
+  namespace: ivolve
 spec:
   replicas: 1
   selector:
@@ -69,7 +70,7 @@ spec:
       - name: myapp
         image: myapp:v1
         ports:
-        - containerPort: 8081
+        - containerPort: 80
 ```
 #### Create a service YAML file (service.yaml):
 ```
@@ -77,14 +78,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: myapp-service
+  namespace: ivolve
 spec:
-  selector:
-    app: myapp
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8081
-  type: ClusterIP
+    - port: 80        
+      protocol: TCP
+      targetPort: 8081 
+  selector:
+    app: myapp        
+  type: ClusterIP    
   ```  
 #### Apply the deployment and service:
 ```
@@ -116,21 +118,22 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: myapp-ingress
-  namespace: default
+  namespace: ivolve
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/service-upstream: "true"
 spec:
+  ingressClassName: nginx
   rules:
-  - host: myapp.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: myapp-service
-            port:
-              number: 80
+    - host: myapp.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: myapp-service
+                port:
+                  number: 80
  ```               
 #### Apply the Ingress resource:
 ```
